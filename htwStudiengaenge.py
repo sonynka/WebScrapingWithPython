@@ -2,6 +2,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import pandas as pd
+import numpy as np
 
 page = requests.get('http://www.htw-berlin.de/studium/studiengaenge/')
 
@@ -27,6 +28,32 @@ for prog in progs:
 
 frame = pd.DataFrame(columns).transpose()
 frame.columns = headers
+
+responses = []
+page_links = ['/studium/ordnungen-module',
+              '/studium/module-ordnungen',
+              '/studium/ordnungen',
+              '/studium/ordnungen-und-module/',
+              '/studium/das-studium/ordnungen-module/',
+              '/studium/das-studium/ordnungen-und-module/',
+              '/studying/programme-regulations-module-descriptions/',
+              '/studying/programme-regulations/']
+
+for website in columns[0]:
+    
+    for page_link in page_links:
+        prog_page = requests.get(website + page_link)
+        if(prog_page.status_code == 200):
+            break
+    
+    if(prog_page.status_code == 200):
+        soup = BeautifulSoup(prog_page.content, 'html.parser')
+        downloads = soup.findAll('a', class_='download')
+    else:
+        print('Invalid response code for: ' + website)
+    responses.append([website, prog_page.status_code])
+    
+
 
         
 
